@@ -27,10 +27,10 @@ using namespace std;
 // To easily convert a numeric string to an int you may use the stoi() function
 // which takes a string as a parameter and returns a string
 
-int isOperator(char o) {
-    if ((o == '+') || (o == '-')) {
+int isOperator(string o) {
+    if ((o[0] == '+') || (o[0] == '-')) {
         return 1;
-    } else if ((o == '*') || (o == '/') || (o == '%')) {
+    } else if ((o[0] == '*') || (o[0] == '/') || (o[0] == '%')) {
         return 2;
     } else {
         return 0;
@@ -38,58 +38,59 @@ int isOperator(char o) {
 }
 
 int calculatePostfixExpression(string expression[], int length) {
-    stack<char> postfixStack;
-    char infixC[2];
-    string postfix[length];
-    int check, index = 0;
-    int left, right;
+    stack<string> postfixStack;
 
     for (int i = 0; i < length; i++) {
-        // strcpy is used to obtain a char from a one character string.
-        // this is done to make comparisons easier and isOperator to work
-        strcpy(infixC, expression[i].c_str());
+        string element = expression[i];
 
-        if (isdigit(infixC[0])) {
-            postfixStack.push(infixC[0]);
+        if (isdigit(element[0])) {
+            postfixStack.push(element);
         }
 
-        else if (isOperator(infixC[0]) > 0) {
-            // operator condition , adds operator to stack
-
-            if (postfixStack.empty()) {
+        else if (isOperator(element)) {
+            if (postfixStack.size() < 2) {
                 return 0;
             }
-            right = postfixStack.top();
-            postfixStack.pop();
-            if (postfixStack.empty()) {
-                return 0;
-            }
-            left = postfixStack.top();
+
+            string rightOperand = postfixStack.top();
             postfixStack.pop();
 
-            switch (infixC[0]) {
-                case '+':
-                    left = left + right;
-                    break;
-                case '-':
-                    left = left - right;
-                    break;
-                case '*':
-                    left = left * right;
-                    break;
-                case '/':
-                    left = left / right;
-                    break;
-                case '%':
-                    left = left % right;
-                    break;
+            string leftOperand = postfixStack.top();
+            postfixStack.pop();
+
+            int right = stoi(rightOperand);
+            int left = stoi(leftOperand);
+
+            if (element == "+") {
+                left = left + right;
+            } else if (element == "-") {
+                left = left - right;
+            } else if (element == "*") {
+                left = left * right;
+            } else if (element == "/") {
+                if (right == 0) {
+                    // Division by zero
+                    return 0;
+                }
+                left = left / right;
+            } else if (element == "%") {
+                if (right == 0) {
+                    // Modulus by zero
+                    return 0;
+                }
+                left = left % right;
             }
-            postfixStack.push(left);
+
+            postfixStack.push(to_string(left));
+        } else {
+            // Invalid element in the expression
+            return 0;
         }
     }
+
     if (postfixStack.size() != 1) {
         return 0;
     } else {
-        return postfixStack.top();
+        return stoi(postfixStack.top());
     }
 }
